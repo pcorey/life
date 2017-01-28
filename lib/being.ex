@@ -25,45 +25,56 @@ defmodule Being do
     GenServer.call(process, {:tick})
   end
 
+  def count_neighbors(process) do
+    GenServer.call(process, {:count_neighbors})
+  end
+
   ###
 
   def handle_call({:tick}, _from, position) do
     to_reap = position
-    |> count_neighbors
-    |> get_to_reap
+    |> do_count_neighbors
+    |> case do
+         2 -> []
+         3 -> []
+         _ -> [self()]
+       end
 
     to_sow = position
-    |> get_dead_neighbors
-    |> get_to_sow
+    |> neighboring_positions
+    |> keep_dead
+    |> keep_valid_children
 
     {:reply, {to_reap, to_sow}, position}
   end
 
-  defp count_neighbors(position) do
-    @offsets
-    |> neighbors(position)
-    |> filter_dead
+  def handle_call({:count_neighbors}, _from, position) do
+    {:reply, do_count_neighbors(position), position}
+  end
+
+  defp do_count_neighbors(position) do
+    position
+    |> neighboring_positions
+    |> keep_live
     |> length
   end
 
-  defp neighbors(offsets, position), do: map(offsets, &(lookup(position, &1)))
-
-  defp filter_dead(processes), do: filter(processes, &(&1 != :undefined))
-
-  defp get_to_reap(neighbors) when neighbors < 2, do: [self()]
-  defp get_to_reap(neighbors) when neighbors > 3, do: [self()]
-  defp get_to_reap(_neighbors), do: []
-
-  defp lookup({x, y}, {dx, dy}) do
-    :global.whereis_name({:cell, x + dx, y + dy})
-  end
-
-  defp get_dead_neighbors({x, y}) do
+  defp neighboring_positions({x, y}) do
     @offsets
     |> map(fn {dx, dy} -> {x + dx, y + dy} end)
-    |> filter(&(lookup(&1, {0, 0}) == :undefined))
   end
 
-  defp get_to_sow(neighbors), do: filter(neighbors, &(count_neighbors(&1) == 3))
+  defp keep_live(positions), do: filter(positions, &(lookup(&1) != :undefined))
+
+  defp keep_dead(positions), do: filter(positions, &(lookup(&1) == :undefined))
+
+  defp lookup({x, y}) do
+    :global.whereis_name({:cell, x, y})
+  end
+
+  defp keep_valid_children(position) do
+    position
+    |> filter(&(do_count_neighbors(&1) == 3))
+  end
 
 end

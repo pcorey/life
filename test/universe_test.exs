@@ -7,6 +7,18 @@ defmodule UniverseTest do
     {:ok, %{}}
   end
 
+  # test "counts neighbors", %{} do
+  #   [
+  #     {-1, 0},
+  #     {0, 0},
+  #     {1, 0}
+  #   ]
+  #   |> Enum.map(&Being.sow/1)
+
+  #   neighbors = Being.count_neighbors(:global.whereis_name({:cell, 0, 0}))
+  #   assert neighbors == 2
+  # end
+
   test "creates a spinner", %{} do
     [
       {-1, 0},
