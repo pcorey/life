@@ -3,7 +3,7 @@ defmodule Being do
 
   import Enum, only: [map: 2, filter: 2]
 
-  @neighbor_offsets [
+  @offsets [
     {-1, -1}, { 0, -1}, { 1, -1},
     {-1,  0},           { 1,  0},
     {-1,  1}, { 0,  1}, { 1,  1},
@@ -40,7 +40,7 @@ defmodule Being do
   end
 
   defp count_neighbors(position) do
-    @neighbor_offsets
+    @offsets
     |> neighbors(position)
     |> filter_dead
     |> length
@@ -59,7 +59,7 @@ defmodule Being do
   end
 
   defp get_dead_neighbors({x, y}) do
-    @neighbor_offsets
+    @offsets
     |> map(fn {dx, dy} -> {x + dx, y + dy} end)
     |> filter(&(lookup(&1, {0, 0}) == :undefined))
   end
