@@ -1,4 +1,4 @@
-defmodule Life.Supervisor do
+defmodule Universe.Supervisor do
   use Supervisor
 
   def start_link do
@@ -7,8 +7,8 @@ defmodule Life.Supervisor do
 
   def init(_) do
     children = [
-      worker(Life.Universe, []),
-      supervisor(Life.CellSupervisor, [])
+      worker(Universe, []),
+      supervisor(Being.Supervisor, [])
     ]
     supervise(children, strategy: :one_for_one)
   end
