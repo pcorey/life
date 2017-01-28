@@ -3,23 +3,42 @@ defmodule UniverseTest do
   doctest Universe
 
   setup do
-    {:ok, _} = Universe.Supervisor.start_link
+    {:ok, universe_supervisor} = Universe.Supervisor.start_link
+
+    on_exit fn ->
+      universe_supervisor
+      |> Process.exit(:kill)
+    end
+
     {:ok, %{}}
   end
 
-  # test "counts neighbors", %{} do
-  #   [
-  #     {-1, 0},
-  #     {0, 0},
-  #     {1, 0}
-  #   ]
-  #   |> Enum.map(&Being.sow/1)
+  defp assert_iteration(iteration) do
+    Universe.tick
 
-  #   neighbors = Being.count_neighbors(:global.whereis_name({:cell, 0, 0}))
-  #   assert neighbors == 2
-  # end
+    expected = iteration
+    |> Enum.map(fn
+         {x, y} -> {:cell, x, y}
+       end)
+    |> Enum.sort
 
-  test "creates a spinner", %{} do
+    actual = :global.registered_names
+    |> Enum.sort()
+
+    assert expected == actual
+  end
+
+  defp test_iterations(iterations) do
+    iterations
+    |> hd
+    |> Enum.map(&Being.sow/1)
+
+    iterations
+    |> tl
+    |> Enum.map(&assert_iteration/1)
+  end
+
+  test "counts neighbors", %{} do
     [
       {-1, 0},
       {0, 0},
@@ -27,70 +46,70 @@ defmodule UniverseTest do
     ]
     |> Enum.map(&Being.sow/1)
 
-    beings = :global.registered_names
-    |> Enum.sort()
-    assert beings == [
-      {:cell, -1, 0},
-      {:cell, 0, 0},
-      {:cell, 1, 0},
-    ]
-
-    Universe.tick
-
-    beings = :global.registered_names
-    |> Enum.sort()
-    assert beings == [
-      {:cell, 0, -1},
-      {:cell, 0, 0},
-      {:cell, 0, 1},
-    ]
-
-    Universe.tick
-
-    beings = :global.registered_names
-    |> Enum.sort()
-    assert beings == [
-      {:cell, -1, 0},
-      {:cell, 0, 0},
-      {:cell, 1, 0},
-    ]
+    neighbors = Being.count_neighbors(:global.whereis_name({:cell, 0, 0}))
+    assert neighbors == 2
   end
 
-  # test "creates another spinner", %{} do
-  #   [
-  #     {0, 0},
-  #     {1, 0},
-  #     {2, 0}
-  #   ]
-  #   |> Enum.map(&Being.sow/1)
+  test "block", %{} do
+    [
+      [
+        {0, 1}, {1, 1},
+        {0, 0}, {1, 0}
+      ],
+      [
+        {0, 1}, {1, 1},
+        {0, 0}, {1, 0}
+      ]
+    ]
+    |> test_iterations
+  end
 
-  #   beings = :global.registered_names
-  #   |> Enum.sort()
-  #   assert beings == [
-  #     {:cell, 0, 0},
-  #     {:cell, 1, 0},
-  #     {:cell, 2, 0},
-  #   ]
+  test "spinner", %{} do
+    [
+      [
+        {-1, 0}, {0, 0}, {1, 0}
+      ],
+      [
+        {0,-1},
+        {0, 0},
+        {0, 1}
+      ],
+      [
+        {-1, 0}, {0, 0}, {1, 0}
+      ],
+    ]
+    |> test_iterations
+  end
 
-  #   Universe.tick
-
-  #   beings = :global.registered_names
-  #   |> Enum.sort()
-  #   assert beings == [
-  #     {:cell, 1, -1},
-  #     {:cell, 1, 0},
-  #     {:cell, 1, 1},
-  #   ]
-
-  #   Universe.tick
-
-  #   beings = :global.registered_names
-  #   |> Enum.sort()
-  #   assert beings == [
-  #     {:cell, 0, 0},
-  #     {:cell, 1, 0},
-  #     {:cell, 2, 0},
-  #   ]
-  # end
+  test "glider", %{} do
+    [
+      [
+                {1, 2},
+                        {2, 1},
+        {0, 0}, {1, 0}, {2, 0},
+      ],
+      [
+        {0, 1},         {2, 1},
+                {1, 0}, {2, 0},
+                {1,-1},
+      ],
+      [
+                        {2, 1},
+        {0, 0},         {2, 0},
+                {1,-1}, {2,-1},
+      ],
+      [
+                {1, 1},
+                        {2, 0}, {3, 0},
+                {1,-1}, {2,-1},
+      ],
+      [
+                        {2, 1},
+                                {3, 0},
+                {1,-1}, {2,-1}, {3,-1}
+      ],
+    ]
+    |> test_iterations
+  end
 
 end
