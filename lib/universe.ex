@@ -17,6 +17,7 @@ defmodule Universe do
     get_being_names()
     |> lookup_being_processes
     |> tick_each_process
+    |> wait_for_ticks
     |> reduce_ticks
     |> reap_and_sow
     {:reply, :ok, []}
@@ -26,7 +27,13 @@ defmodule Universe do
 
   defp lookup_being_processes(names), do: map(names, &:global.whereis_name/1)
 
-  defp tick_each_process(processes), do: map(processes, &Being.tick/1)
+  defp tick_each_process(processes) do
+    map(processes, &(Task.async(fn -> Being.tick(&1) end)))
+  end
+
+  defp wait_for_ticks(asyncs) do
+    map(asyncs, &Task.await/1)
+  end
 
   defp reduce_ticks(ticks), do: reduce(ticks, &accumulate_ticks/2)
 
