@@ -19,8 +19,8 @@ defmodule Being do
     Supervisor.terminate_child(Being.Supervisor, process)
   end
 
-  def sow({x, y}) do
-    Being.Supervisor.sow(x, y)
+  def sow(position) do
+    Supervisor.start_child(Being.Supervisor, [position])
   end
 
   def tick(process) do
@@ -34,11 +34,12 @@ defmodule Being do
   def lookup(position) do
     Being.Registry
     |> Registry.lookup(position)
+    |> Enum.map(fn
+      {pid, _valid} -> pid
+      nil -> nil
+    end)
+    |> Enum.filter(&Process.alive?/1)
     |> List.first
-    |> case do
-         {pid, value} -> pid
-         nil -> nil
-       end
   end
 
   ###

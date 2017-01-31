@@ -14,7 +14,6 @@ defmodule UniverseTest do
     Universe.tick
 
     expected = iteration
-    # |> Enum.map(&Being.lookup/1)
     |> Enum.sort
 
     actual = Being.Supervisor.children
