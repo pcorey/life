@@ -3,27 +3,24 @@ defmodule UniverseTest do
   doctest Universe
 
   setup do
-    {:ok, universe_supervisor} = Universe.Supervisor.start_link
-
     on_exit fn ->
-      universe_supervisor
-      |> Process.exit(:kill)
+      Being.Supervisor.children
+      |> Enum.map(&Being.reap/1)
     end
-
-    {:ok, %{}}
+    :ok
   end
 
   defp assert_iteration(iteration) do
     Universe.tick
 
     expected = iteration
-    |> Enum.map(fn
-         {x, y} -> {:cell, x, y}
-       end)
+    # |> Enum.map(&Being.lookup/1)
     |> Enum.sort
 
-    actual = :global.registered_names
-    |> Enum.sort()
+    actual = Being.Supervisor.children
+    |> Enum.map(&(Registry.keys(Being.Registry, &1)))
+    |> List.flatten
+    |> Enum.sort
 
     assert expected == actual
   end
@@ -38,7 +35,7 @@ defmodule UniverseTest do
     |> Enum.map(&assert_iteration/1)
   end
 
-  test "counts neighbors", %{} do
+  test "counts neighbors" do
     [
       {-1, 0},
       {0, 0},
@@ -46,11 +43,11 @@ defmodule UniverseTest do
     ]
     |> Enum.map(&Being.sow/1)
 
-    neighbors = Being.count_neighbors(:global.whereis_name({:cell, 0, 0}))
+    neighbors = Being.count_neighbors(Being.lookup({0, 0}))
     assert neighbors == 2
   end
 
-  test "block", %{} do
+  test "block" do
     [
       [
         {0, 1}, {1, 1},
@@ -64,7 +61,7 @@ defmodule UniverseTest do
     |> test_iterations
   end
 
-  test "spinner", %{} do
+  test "spinner" do
     [
       [
         {-1, 0}, {0, 0}, {1, 0}
@@ -81,7 +78,7 @@ defmodule UniverseTest do
     |> test_iterations
   end
 
-  test "glider", %{} do
+  test "glider" do
     [
       [
                 {1, 2},

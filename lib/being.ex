@@ -9,8 +9,10 @@ defmodule Being do
     {-1,  1}, { 0,  1}, { 1,  1},
   ]
 
-  def start_link({x, y}) do
-    GenServer.start_link(__MODULE__, {x, y}, name: {:global, {:cell, x, y}})
+  def start_link(position) do
+    GenServer.start_link(__MODULE__, position, name: {
+      :via, Registry, {Being.Registry, position}
+    })
   end
 
   def reap(process) do
@@ -27,6 +29,16 @@ defmodule Being do
 
   def count_neighbors(process) do
     GenServer.call(process, {:count_neighbors})
+  end
+
+  def lookup(position) do
+    Being.Registry
+    |> Registry.lookup(position)
+    |> List.first
+    |> case do
+         {pid, value} -> pid
+         nil -> nil
+       end
   end
 
   ###
@@ -64,13 +76,9 @@ defmodule Being do
     |> map(fn {dx, dy} -> {x + dx, y + dy} end)
   end
 
-  defp keep_live(positions), do: filter(positions, &(lookup(&1) != :undefined))
+  defp keep_live(positions), do: filter(positions, &(lookup(&1) != nil))
 
-  defp keep_dead(positions), do: filter(positions, &(lookup(&1) == :undefined))
-
-  defp lookup({x, y}) do
-    :global.whereis_name({:cell, x, y})
-  end
+  defp keep_dead(positions), do: filter(positions, &(lookup(&1) == nil))
 
   defp keep_valid_children(position) do
     position

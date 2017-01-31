@@ -1,7 +1,7 @@
 defmodule Universe do
   use GenServer
 
-  import Enum, only: [map: 2, reduce: 2]
+  import Enum, only: [map: 2, reduce: 3]
 
   def start_link do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -14,8 +14,7 @@ defmodule Universe do
   ###
 
   def handle_call({:tick}, _from, []) do
-    get_being_names()
-    |> lookup_being_processes
+    get_beings()
     |> tick_each_process
     |> wait_for_ticks
     |> reduce_ticks
@@ -23,9 +22,7 @@ defmodule Universe do
     {:reply, :ok, []}
   end
 
-  defp get_being_names, do: :global.registered_names
-
-  defp lookup_being_processes(names), do: map(names, &:global.whereis_name/1)
+  defp get_beings, do: Being.Supervisor.children
 
   defp tick_each_process(processes) do
     map(processes, &(Task.async(fn -> Being.tick(&1) end)))
@@ -35,7 +32,7 @@ defmodule Universe do
     map(asyncs, &Task.await/1)
   end
 
-  defp reduce_ticks(ticks), do: reduce(ticks, &accumulate_ticks/2)
+  defp reduce_ticks(ticks), do: reduce(ticks, {[], []}, &accumulate_ticks/2)
 
   defp accumulate_ticks({reap, sow}, {acc_reap, acc_sow}) do
     {acc_reap ++ reap, acc_sow ++ sow}
