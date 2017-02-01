@@ -14,7 +14,7 @@ defmodule Universe do
   ###
 
   def handle_call({:tick}, _from, []) do
-    get_beings()
+    get_cells()
     |> tick_each_process
     |> wait_for_ticks
     |> reduce_ticks
@@ -22,7 +22,7 @@ defmodule Universe do
     {:reply, :ok, []}
   end
 
-  defp get_beings, do: Cell.Supervisor.children
+  defp get_cells, do: Cell.Supervisor.children
 
   defp tick_each_process(processes) do
     map(processes, &(Task.async(fn -> Cell.tick(&1) end)))
