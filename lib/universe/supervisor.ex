@@ -2,7 +2,7 @@ defmodule Universe.Supervisor do
   use Supervisor
 
   def start(_type, _args) do
-    start_link
+    start_link()
   end
 
   def start_link do
@@ -12,8 +12,8 @@ defmodule Universe.Supervisor do
   def init(_) do
     children = [
       worker(Universe, []),
-      supervisor(Being.Supervisor, []),
-      supervisor(Registry, [:unique, Being.Registry])
+      supervisor(Cell.Supervisor, []),
+      supervisor(Registry, [:unique, Cell.Registry])
     ]
     supervise(children, strategy: :one_for_one)
   end

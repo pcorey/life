@@ -1,4 +1,4 @@
-defmodule Being.Supervisor do
+defmodule Cell.Supervisor do
   use Supervisor
 
   def start_link do
@@ -7,13 +7,13 @@ defmodule Being.Supervisor do
 
   def init([]) do
     children = [
-      worker(Being, [])
+      worker(Cell, [])
     ]
     supervise(children, strategy: :simple_one_for_one, restart: :transient)
   end
 
   def children do
-    Being.Supervisor
+    Cell.Supervisor
     |> Supervisor.which_children
     |> Enum.map(fn
       {_, pid, _, _} -> pid

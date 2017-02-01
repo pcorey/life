@@ -4,8 +4,8 @@ defmodule UniverseTest do
 
   setup do
     on_exit fn ->
-      Being.Supervisor.children
-      |> Enum.map(&Being.reap/1)
+      Cell.Supervisor.children
+      |> Enum.map(&Cell.reap/1)
     end
     :ok
   end
@@ -16,8 +16,8 @@ defmodule UniverseTest do
     expected = iteration
     |> Enum.sort
 
-    actual = Being.Supervisor.children
-    |> Enum.map(&(Registry.keys(Being.Registry, &1)))
+    actual = Cell.Supervisor.children
+    |> Enum.map(&(Registry.keys(Cell.Registry, &1)))
     |> List.flatten
     |> Enum.sort
 
@@ -27,7 +27,7 @@ defmodule UniverseTest do
   defp test_iterations(iterations) do
     iterations
     |> hd
-    |> Enum.map(&Being.sow/1)
+    |> Enum.map(&Cell.sow/1)
 
     iterations
     |> tl
@@ -40,9 +40,9 @@ defmodule UniverseTest do
       {0, 0},
       {1, 0}
     ]
-    |> Enum.map(&Being.sow/1)
+    |> Enum.map(&Cell.sow/1)
 
-    neighbors = Being.count_neighbors(Being.lookup({0, 0}))
+    neighbors = Cell.count_neighbors(Cell.lookup({0, 0}))
     assert neighbors == 2
   end
 

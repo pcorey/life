@@ -1,4 +1,4 @@
-defmodule Being do
+defmodule Cell do
   use GenServer
 
   import Enum, only: [map: 2, filter: 2]
@@ -11,16 +11,16 @@ defmodule Being do
 
   def start_link(position) do
     GenServer.start_link(__MODULE__, position, name: {
-      :via, Registry, {Being.Registry, position}
+      :via, Registry, {Cell.Registry, position}
     })
   end
 
   def reap(process) do
-    Supervisor.terminate_child(Being.Supervisor, process)
+    Supervisor.terminate_child(Cell.Supervisor, process)
   end
 
   def sow(position) do
-    Supervisor.start_child(Being.Supervisor, [position])
+    Supervisor.start_child(Cell.Supervisor, [position])
   end
 
   def tick(process) do
@@ -32,7 +32,7 @@ defmodule Being do
   end
 
   def lookup(position) do
-    Being.Registry
+    Cell.Registry
     |> Registry.lookup(position)
     |> Enum.map(fn
       {pid, _valid} -> pid
@@ -81,8 +81,8 @@ defmodule Being do
 
   defp keep_dead(positions), do: filter(positions, &(lookup(&1) == nil))
 
-  defp keep_valid_children(position) do
-    position
+  defp keep_valid_children(positions) do
+    positions
     |> filter(&(do_count_neighbors(&1) == 3))
   end
 

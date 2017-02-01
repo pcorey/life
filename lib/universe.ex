@@ -22,10 +22,10 @@ defmodule Universe do
     {:reply, :ok, []}
   end
 
-  defp get_beings, do: Being.Supervisor.children
+  defp get_beings, do: Cell.Supervisor.children
 
   defp tick_each_process(processes) do
-    map(processes, &(Task.async(fn -> Being.tick(&1) end)))
+    map(processes, &(Task.async(fn -> Cell.tick(&1) end)))
   end
 
   defp wait_for_ticks(asyncs) do
@@ -39,8 +39,8 @@ defmodule Universe do
   end
 
   defp reap_and_sow({to_reap, to_sow}) do
-    map(to_reap, &Being.reap/1)
-    map(to_sow,  &Being.sow/1)
+    map(to_reap, &Cell.reap/1)
+    map(to_sow,  &Cell.sow/1)
   end
 
 end
