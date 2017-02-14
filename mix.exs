@@ -1,24 +1,11 @@
-defmodule LifeProcesses.Mixfile do
+defmodule Umbrella.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :life,
-     version: "0.1.0",
-     elixir: "~> 1.4",
+    [apps_path: "apps",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps()]
-  end
-
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
-  def application do
-    # Specify extra applications you'll use from Erlang/Elixir
-    [
-      extra_applications: [:logger],
-      mod: {Universe.Supervisor, []}
-    ]
   end
 
   # Dependencies can be Hex packages:
@@ -29,7 +16,10 @@ defmodule LifeProcesses.Mixfile do
   #
   #   {:my_dep, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
   #
-  # Type "mix help deps" for more examples and options
+  # Type "mix help deps" for more examples and options.
+  #
+  # Dependencies listed here are available only for this project
+  # and cannot be accessed from applications inside the apps folder
   defp deps do
     []
   end
