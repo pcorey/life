@@ -8,7 +8,7 @@ defmodule Universe do
   end
 
   def tick do
-    GenServer.call(__MODULE__, {:tick})
+    GenServer.call(__MODULE__, {:tick}, 6000000)
   end
 
   ###

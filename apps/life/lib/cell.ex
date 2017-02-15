@@ -27,6 +27,10 @@ defmodule Cell do
     GenServer.call(process, {:tick})
   end
 
+  def position(process) do
+    GenServer.call(process, {:position})
+  end
+
   def count_neighbors(process) do
     GenServer.call(process, {:count_neighbors})
   end
@@ -59,6 +63,10 @@ defmodule Cell do
     |> keep_valid_children
 
     {:reply, {to_reap, to_sow}, position}
+  end
+
+  def handle_call({:position}, _from, position) do
+    {:reply, position, position}
   end
 
   def handle_call({:count_neighbors}, _from, position) do

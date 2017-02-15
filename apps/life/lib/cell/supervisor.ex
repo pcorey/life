@@ -20,4 +20,9 @@ defmodule Cell.Supervisor do
     end)
   end
 
+  def positions do
+    children()
+    |> Enum.map(&Cell.position/1)
+  end
+
 end
