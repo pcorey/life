@@ -41,8 +41,7 @@ function setupSocket() {
 
     socket.connect();
 
-    // Now that you are connected, you can join channels with a topic:
-    let channel = socket.channel("life", {})
+    let channel = socket.channel("life", {});
     channel.join()
         .receive("ok", cells => {
             render(cells.positions);
