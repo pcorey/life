@@ -8,23 +8,13 @@ defmodule Interface.LifeChannel do
     Pattern.diehard(20, 20)
     |> Enum.map(&Cell.sow/1)
 
-    positions = Cell.Supervisor.positions
-    |> Enum.map(fn
-      {x, y} -> %{x: x, y: y}
-    end)
-
-    {:ok, %{positions: positions}, socket}
+    {:ok, %{positions: Cell.Supervisor.positions}, socket}
   end
 
   def handle_in("tick", _, socket) do
     Universe.tick
 
-    positions = Cell.Supervisor.positions
-    |> Enum.map(fn
-      {x, y} -> %{x: x, y: y}
-    end)
-
-    broadcast!(socket, "tick", %{positions: positions})
+    broadcast!(socket, "tick", %{positions: Cell.Supervisor.positions})
 
     {:noreply, socket}
   end
